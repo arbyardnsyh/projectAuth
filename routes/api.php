@@ -22,3 +22,15 @@ Route::middleware(['auth:sanctum', 'role:admin'])->get('/user', function (Reques
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
+Route::post('/login', [AuthController::class, 'login'])->name('login');
+
+
+//soal 1
+Route::middleware(['auth:sanctum'])->put('/profile', [AuthController::class, 'updateProfile']);
+
+
+//soal 2
+Route::middleware(['auth:sanctum', 'role:admin'])->delete('/users/{id}', [AuthController::class, 'deleteUser']);
+
+//soal 3
+Route::middleware(['auth:sanctum', 'role:admin'])->get('/users', [AuthController::class, 'getAllUsers']);

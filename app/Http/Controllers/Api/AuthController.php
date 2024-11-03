@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\Auth; // Tambahkan ini
 
 class AuthController extends Controller
 {
@@ -46,12 +47,61 @@ class AuthController extends Controller
         ]);
     }
 
-    // Membuat token menggunakan device_name yang diterima dari request
+  
     $token = $user->createToken($request->device_name)->plainTextToken;
 
     return response()->json([
         'token' => $token
     ], 200);
 }
+
+public function updateProfile(Request $request)
+{
+    $user = $request->user(); // Mendapatkan user yang sedang login
+
+    $request->validate([
+        'name' => 'sometimes|string|max:255',
+        'email' => 'sometimes|string|email|max:255|unique:users,email,' . $user->id,
+        'password' => 'sometimes|string|min:8|confirmed',
+    ]);
+
+    if ($request->has('name')) {
+        $user->name = $request->name;
+    }
+
+    if ($request->has('email')) {
+        $user->email = $request->email;
+    }
+
+    if ($request->has('password')) {
+        $user->password = Hash::make($request->password);
+    }
+
+    $user->save();
+
+    return response()->json(['message' => 'Profile updated successfully.', 'user' => $user], 200);
+}
+
+
+public function deleteUser($id)
+{
+    $user = User::find($id);
+
+    if (!$user) {
+        return response()->json(['message' => 'User not found'], 404);
+    }
+
+    $user->delete();
+
+    return response()->json(['message' => 'User deleted successfully'], 200);
+}
+
+public function getAllUsers()
+{
+    $users = User::all();
+
+    return response()->json(['users' => $users], 200);
+}
+
 
 }
